@@ -1,45 +1,52 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
+import { NewsDetailPage } from "./pages/NewsDetailPage";
+import { NewsPage } from "./pages/NewsPage";
 
-/**
- * Сирі тести новин (без POM).
- * TODO (студент): переписати через NewsPage / NewsList / NewsCard / NewsDetailPage
- * (композиція, як ClubsPage → ClubList → ClubCard).
- */
-test.describe('News (raw locators — rewrite to POM + CO)', () => {
-  test('News page shows title and first article', async ({ page }) => {
-    await page.goto('./news');
+test.describe("News (raw locators — rewrite to POM + CO)", () => {
+  test("News page shows title and first article", async ({ page }) => {
+    const newsPage = new NewsPage(page);
+    await newsPage.gotoNewsPage();
+    await newsPage.waitForNewsLoaded();
+    const firstCard = newsPage.getNewsList().getFirstCard();
 
-    await expect(page.getByRole('heading', { name: 'Новини', exact: true })).toBeVisible();
-    await expect(page.locator('#newsContainer').first()).toBeVisible();
-    await expect(page.locator('#newsTitle').first()).toHaveText(
-      'Зимові канікули з користю: гуртки, що працюють у грудні-січні',
+    await expect(newsPage.getPageTitleLocator()).toBeVisible();
+    await expect(firstCard.getTitleLocator()).toHaveText(
+      "Зимові канікули з користю: гуртки, що працюють у грудні-січні",
     );
-    await expect(page.locator('#newsDate').first()).toHaveText('15.12.2025');
+    await expect(firstCard.getDateLocator()).toHaveText("15.12.2025");
   });
 
-  test('Open news details from list card', async ({ page }) => {
-    await page.goto('./news');
+  test("Open news details from list card", async ({ page }) => {
+    const newsPage = new NewsPage(page);
+    const newsDetailPage = new NewsDetailPage(page);
 
-    await page.locator('#newsContainer').first().locator('#detailButton a').click();
+    await newsPage.gotoNewsPage();
+    await newsPage.getNewsList().getFirstCard().openDetails();
 
     await expect(page).toHaveURL(/\/news\/8\/?$/);
-    await expect(page.locator('#major-title')).toHaveText(
-      'Зимові канікули з користю: гуртки, що працюють у грудні-січні',
+
+    await expect(newsDetailPage.getTitleLocator()).toHaveText(
+      "Зимові канікули з користю: гуртки, що працюють у грудні-січні",
     );
-    await expect(page.locator('.news-page .content-text')).toContainText('Зимові канікули');
+    await expect(newsDetailPage.getContentLocator()).toContainText(
+      "Зимові канікули",
+    );
   });
 
-  test('Pagination changes news list', async ({ page }) => {
-    await page.goto('./news');
+  test("Pagination changes news list", async ({ page }) => {
+    const newsPage = new NewsPage(page);
+    const list = newsPage.getNewsList();
 
-    await expect(page.locator('#newsTitle').first()).toHaveText(
-      'Зимові канікули з користю: гуртки, що працюють у грудні-січні',
+    await newsPage.gotoNewsPage();
+
+    await expect(list.getFirstCard().getTitleLocator()).toHaveText(
+      "Зимові канікули з користю: гуртки, що працюють у грудні-січні",
     );
 
-    await page.locator('.ant-pagination-item-2').click();
+    await newsPage.goToPage(2);
 
-    await expect(page.locator('#newsTitle').first()).toHaveText(
-      'Марафон «Навчай українською»: освіта без кордонів',
+    await expect(list.getFirstCard().getTitleLocator()).toHaveText(
+      "Марафон «Навчай українською»: освіта без кордонів",
     );
   });
 });

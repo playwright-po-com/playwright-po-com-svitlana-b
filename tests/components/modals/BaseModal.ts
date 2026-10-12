@@ -1,5 +1,5 @@
-import { type Locator, type Page } from '@playwright/test';
-import { BaseComponent } from '../../pages/base/BaseComponent';
+import { type Locator, type Page } from "@playwright/test";
+import { BaseComponent } from "../../pages/base/BaseComponent";
 
 /**
  * Базовий Component Object для Ant Design модалок.
@@ -16,15 +16,15 @@ export abstract class BaseModal extends BaseComponent {
 
   constructor(page: Page, root: Locator) {
     super(page, root);
-    this.closeButton = this.root.locator('.ant-modal-close');
+    this.closeButton = this.root.locator(".ant-modal-close");
   }
 
   async waitForOpen(): Promise<void> {
-    await this.root.waitFor({ state: 'visible' });
+    await this.root.waitFor({ state: "visible" });
   }
 
   async waitForClosed(): Promise<void> {
-    await this.root.waitFor({ state: 'hidden' });
+    await this.root.waitFor({ state: "hidden" });
   }
 
   async close(): Promise<void> {
